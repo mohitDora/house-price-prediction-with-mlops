@@ -6,3 +6,4 @@ house_price_prediction_with_mlops.egg-info/
 logs/
 __pycache__
 temp/
+mlruns/
