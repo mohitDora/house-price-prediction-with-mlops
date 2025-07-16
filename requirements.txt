@@ -1,0 +1,16 @@
+pandas
+numpy
+scikit-learn
+dvc
+mlflow
+pytest
+pandera
+fastapi
+uvicorn
+python-multipart
+joblib
+pymongo
+python-dotenv
+loguru
+ipykernel
+-e .
