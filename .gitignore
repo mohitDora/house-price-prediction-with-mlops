@@ -1,9 +1,10 @@
 .venv
 .env
-data/
-models/
 house_price_prediction_with_mlops.egg-info/
 logs/
 __pycache__
 temp/
 mlruns/
+/models/preprocessor.joblib
+/data/raw_data.csv
+/data/processed_data.parquet

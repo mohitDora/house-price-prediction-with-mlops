@@ -1,0 +1,5 @@
+outs:
+- md5: 8b0a862849e39db74d357f1da67dce9b
+  size: 4558
+  hash: md5
+  path: preprocessor.joblib
