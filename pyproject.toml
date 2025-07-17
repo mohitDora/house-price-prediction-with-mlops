@@ -5,22 +5,23 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-"pandas",
-"numpy",
-"scikit-learn",
-"dvc[s3]",
-"mlflow",
-"pytest",
-"pandera",
-"fastapi",
-"uvicorn",
-"python-multipart",
-"joblib",
-"pymongo",
-"python-dotenv",
-"loguru",
-"ipykernel",
-"ruff"]
+    "dvc[s3]>=3.61.0",
+    "fastapi>=0.116.1",
+    "ipykernel>=6.29.5",
+    "joblib>=1.5.1",
+    "loguru>=0.7.3",
+    "mlflow>=3.1.1",
+    "numpy>=2.3.1",
+    "pandas>=2.3.1",
+    "pandera>=0.25.0",
+    "pymongo>=4.13.2",
+    "pytest>=8.4.1",
+    "python-dotenv>=1.1.1",
+    "python-multipart>=0.0.20",
+    "ruff>=0.12.3",
+    "scikit-learn>=1.7.0",
+    "uvicorn>=0.35.0",
+]
 
 # pyproject.toml (at the root of your project)
 [tool.ruff]

@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y git && \
 
 # Copy pyproject.toml and poetry.lock (or requirements.txt) first to leverage Docker cache
 COPY pyproject.toml /app/
+COPY uv.lock /app/
 # If you're using poetry.lock instead of uv.lock/requirements.txt:
 # COPY poetry.lock /app/
 
