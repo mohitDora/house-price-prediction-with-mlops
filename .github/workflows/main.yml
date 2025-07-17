@@ -16,6 +16,10 @@ jobs:
     env:
       # MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
       MLFLOW_EXPERIMENT_NAME: "GitHub Actions Training"
+      
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+      MONGO_COLLECTION_NAME: ${{ secrets.MONGO_COLLECTION_NAME }}
 
       # --- AWS Credentials for DVC S3 Remote ---
       # These secrets must be configured in your GitHub repository settings
