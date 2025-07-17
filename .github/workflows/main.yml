@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+      # MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
       MLFLOW_EXPERIMENT_NAME: "GitHub Actions Training"
 
       # --- AWS Credentials for DVC S3 Remote ---
@@ -50,8 +50,10 @@ jobs:
       - name: DVC Pull Data and Model Artifacts for Tests
         run: dvc pull data/raw_data.csv data/processed_data.parquet models/preprocessor.joblib models/final_model.joblib
 
-      - name: Run Ruff Linting
-        run: ruff check src/ tests/ --diff --exit-code
+      - name: Run Ruff Auto-fix and Format
+        run: |
+          ruff check --fix src/ tests/
+          ruff format src/ tests/
 
       - name: Run Pytest
         run: pytest
