@@ -25,7 +25,7 @@ RUN pip install uv
 
 # Install project dependencies using uv sync
 # This will install all dependencies from pyproject.toml
-RUN uv sync --system
+RUN uv sync
 
 # Copy the rest of your application code, including .dvc/config and .dvc pointer files
 COPY . /app/
