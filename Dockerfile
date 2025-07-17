@@ -9,11 +9,12 @@ WORKDIR /app
 
 # Install DVC as it's needed to pull data/model artifacts
 # We need to install git as well for dvc to function properly with git-tracked .dvc files
-RUN pip install --no-cache-dir dvc[s3] 
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+# Using a single RUN command to combine apt-get and pip installs to reduce image layers
+RUN apt-get update && apt-get install -y git && \
+    pip install --no-cache-dir "dvc[s3]" && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy pyproject.toml and poetry.lock (or requirements.txt) first to leverage Docker cache
-# Use uv for dependency management inside Docker
 COPY pyproject.toml /app/
 # If you're using poetry.lock instead of uv.lock/requirements.txt:
 # COPY poetry.lock /app/
@@ -23,14 +24,14 @@ RUN pip install uv
 
 # Install project dependencies using uv sync
 # This will install all dependencies from pyproject.toml
-RUN uv sync --system 
+RUN uv sync --system
 
-# Copy the rest of your application code
+# Copy the rest of your application code, including .dvc/config and .dvc pointer files
 COPY . /app/
 
 # Expose the port that FastAPI will run on
 EXPOSE 8000
 
 # Set the command to run your FastAPI application using Uvicorn
-# --host 0.0.0.0 makes the server accessible from outside the container
+# The model artifacts will be pulled from S3 by DVC via load_model_artifacts at app startup
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

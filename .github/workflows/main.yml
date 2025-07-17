@@ -1,0 +1,127 @@
+name: ML CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-lint-test-train:
+    runs-on: ubuntu-latest
+
+    env:
+      MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+      MLFLOW_EXPERIMENT_NAME: "GitHub Actions Training"
+
+      # --- AWS Credentials for DVC S3 Remote ---
+      # These secrets must be configured in your GitHub repository settings
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: "ap-south-1" # Replace with your S3 bucket's region (e.g., us-east-1, ap-south-1)
+      # ----------------------------------------
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install project dependencies (including dvc[s3])
+        # Ensure dvc[s3] is listed in your pyproject.toml as a dependency or dev-dependency
+        # uv sync will install it if it's there.
+        # If not, you might need: pip install "dvc[s3]"
+        run: uv sync --system
+
+      - name: Install Git (DVC dependency)
+        run: sudo apt-get update && sudo apt-get install -y git
+
+      # No explicit 'dvc remote add' or 'dvc remote modify' needed here IF
+      # your .dvc/config is already committed with the S3 remote URL.
+      # DVC will pick up the remote config from the .dvc/config file,
+      # and the credentials from the AWS_* environment variables.
+
+      - name: DVC Pull Data and Model Artifacts for Tests
+        run: dvc pull data/raw_data.csv data/processed_data.parquet models/preprocessor.joblib models/final_model.joblib
+
+      - name: Run Ruff Linting
+        run: ruff check src/ tests/ --diff --exit-code
+
+      - name: Run Pytest
+        run: pytest
+
+      - name: Run Data Processing
+        run: python src/data_processing.py
+
+      - name: Run Model Training and Log to MLflow
+        run: python src/train_model.py
+
+      # --- Optional: DVC Push new artifacts after training ---
+      # Only uncomment this if you want new models/processed data from CI/CD to be pushed to S3
+      # This effectively means your CI is continuously pushing updated artifacts.
+      # You might also want to only push if tests pass or certain conditions are met.
+      - name: DVC Push New Model Artifacts to S3
+        if: success() # Only push if previous steps succeeded
+        run: dvc push data/processed_data.parquet models/preprocessor.joblib models/final_model.joblib
+      # --------------------------------------------------------
+
+  build-docker-image:
+    runs-on: ubuntu-latest
+    needs: build-lint-test-train # This job runs only after build-lint-test-train is successful
+
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      # --- AWS Credentials for DVC S3 Remote during Docker Build (if you decide to pull at build time) ---
+      # If your Dockerfile includes `dvc pull` steps, these are needed during the build.
+      # If pulling at runtime (as discussed above), these are NOT needed here,
+      # but will be needed during `docker run` or deployment.
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: "ap-south-1"
+      # --------------------------------------------------------------------------------------------------
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install DVC and Git (necessary for dvc pull if you decide to add it in Dockerfile build phase)
+      # This step is redundant if your Dockerfile already installs dvc[s3] AND you are only pulling at runtime.
+      # It's here primarily if you changed your mind and decided to put `dvc pull` within the Dockerfile itself during build.
+      - name: Install DVC and Git (for potential Docker build-time pull)
+        run: |
+          pip install dvc
+          sudo apt-get update && sudo apt-get install -y git
+
+      # If you intend to pull during Docker build, uncomment this. Otherwise, rely on runtime pull.
+      # - name: DVC Pull Artifacts for Docker Build
+      #   run: dvc pull data/raw_data.csv data/processed_data.parquet models/preprocessor.joblib models/final_model.joblib
+
+      - name: Docker Login
+        if: env.DOCKER_USERNAME != '' && env.DOCKER_PASSWORD != ''
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        # If you were pulling during build, you'd pass build-args here:
+        # build-args AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          docker build -t house-price-predictor-api:${{ github.sha }} .
+          docker tag house-price-predictor-api:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/house-price-predictor-api:latest
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/house-price-predictor-api:latest
+
+  # deploy: (Conceptual - remains largely the same, but would need AWS credentials for cloud deployment)

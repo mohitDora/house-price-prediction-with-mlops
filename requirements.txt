@@ -1,7 +1,7 @@
 pandas
 numpy
 scikit-learn
-dvc[gdrive]
+dvc[s3]
 mlflow
 pytest
 pandera

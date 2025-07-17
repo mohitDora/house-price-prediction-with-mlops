@@ -1,4 +1,6 @@
 [core]
-    remote = local_dvc_remote
+    remote = s3remote
 ['remote "local_dvc_remote"']
     url = ../dvc_storage
+['remote "s3remote"']
+    url = s3://my-mlops-dvc-storage/dvc_cache
