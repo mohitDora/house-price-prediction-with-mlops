@@ -5,3 +5,19 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
+
+# pyproject.toml (at the root of your project)
+[tool.ruff]
+line-length = 120
+target-version = "py310" # Or your Python version
+
+[tool.ruff.lint]
+# Enable all `flake8` rules, but disable `E501` (line length, handled by formatter)
+# and `D` for docstrings if you don't want to enforce them rigorously yet.
+# We'll use a common set of linters: E (pycodestyle errors), F (pyflakes errors), I (isort)
+select = ["E", "F", "I"]
+ignore = ["E501"] # Handled by formatter
+
+[tool.ruff.format]
+# Enable formatting (equivalent to black)
+docstring-code-format = true

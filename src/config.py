@@ -1,5 +1,7 @@
 import os
+
 from dotenv import load_dotenv
+
 from src.logger import logger
 
 # Load environment variables from .env file

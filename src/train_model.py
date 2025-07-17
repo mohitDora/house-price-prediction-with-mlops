@@ -1,21 +1,20 @@
 # src/train_model.py
 
-import mlflow.sklearn
-import pandas as pd
-import numpy as np
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import json  # To save feature names for later use
+import os
+import sys
+
 import joblib
 import mlflow
 import mlflow.sklearn
-import os
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-import json  # To save feature names for later use
-import sys
 
-from src.logger import logger
-from src.exception import MyException
 from src.config import config
+from src.exception import MyException
+from src.logger import logger
 
 # Set experiment name
 mlflow.set_experiment("House Price Prediction")
@@ -36,9 +35,7 @@ def load_processed_data_and_preprocessor(processed_data_path, preprocessor_path)
         logger.info(f"Loaded X shape: {X.shape}, y shape: {y.shape}")
         return X, y, preprocessor
     except Exception as e:
-        logger.error(
-            f"Failed to load processed data or preprocessor: {e}", exc_info=True
-        )
+        logger.error(f"Failed to load processed data or preprocessor: {e}", exc_info=True)
         raise MyException(f"Failed to load processed data or preprocessor: {e}", sys)
 
 
@@ -81,9 +78,7 @@ def train_model(
     random_state=config.RANDOM_STATE,
 ):
     """Trains a RandomForestRegressor model using config values."""
-    logger.info(
-        f"Training RandomForestRegressor with n_estimators={n_estimators}, max_features={max_features}"
-    )
+    logger.info(f"Training RandomForestRegressor with n_estimators={n_estimators}, max_features={max_features}")
     try:
         model = RandomForestRegressor(
             n_estimators=n_estimators,
@@ -120,12 +115,8 @@ def evaluate_model(model, X, y, dataset_name="validation"):
 
         return metrics
     except Exception as e:
-        logger.error(
-            f"Error during model evaluation on {dataset_name} set: {e}", exc_info=True
-        )
-        raise MyException(
-            f"Error during model evaluation on {dataset_name} set: {e}", sys
-        )
+        logger.error(f"Error during model evaluation on {dataset_name} set: {e}", exc_info=True)
+        raise MyException(f"Error during model evaluation on {dataset_name} set: {e}", sys)
 
 
 if __name__ == "__main__":
@@ -137,9 +128,7 @@ if __name__ == "__main__":
         logger.info("DVC pull complete.")
 
         # Load processed data and preprocessor
-        X, y, preprocessor = load_processed_data_and_preprocessor(
-            config.PROCESSED_DATA_PATH, config.PREPROCESSOR_PATH
-        )
+        X, y, preprocessor = load_processed_data_and_preprocessor(config.PROCESSED_DATA_PATH, config.PREPROCESSOR_PATH)
 
         # Define the expected input schema for the API.
         # This reflects the original raw input columns the user will provide.
@@ -165,9 +154,7 @@ if __name__ == "__main__":
         # Split data
         X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
 
-        with mlflow.start_run(
-            run_name=f"RandomForest_N{config.RF_N_ESTIMATORS}_MF{config.RF_MAX_FEATURES}"
-        ):
+        with mlflow.start_run(run_name=f"RandomForest_N{config.RF_N_ESTIMATORS}_MF{config.RF_MAX_FEATURES}"):
             # Log parameters
             mlflow.log_param("model_type", "RandomForestRegressor")
             mlflow.log_param("n_estimators", config.RF_N_ESTIMATORS)
@@ -208,6 +195,4 @@ if __name__ == "__main__":
             logger.info("Model training and experiment logging complete.")
 
     except Exception as e:
-        logger.error(
-            f"An unexpected error occurred during model training: {e}", exc_info=True
-        )
+        logger.error(f"An unexpected error occurred during model training: {e}", exc_info=True)

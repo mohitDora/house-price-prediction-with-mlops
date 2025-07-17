@@ -1,17 +1,16 @@
-import pytest
-import pandas as pd
-import numpy as np
-import os
 import joblib
+import numpy as np
+import pytest
 from sklearn.ensemble import RandomForestRegressor
+
+from src.config import config
+from src.exception import MyException
 from src.train_model import (
+    evaluate_model,
     load_processed_data_and_preprocessor,
     split_data,
     train_model,
-    evaluate_model,
 )
-from src.exception import MyException
-from src.config import config
 
 
 # Fixture for mock processed data and preprocessor
@@ -74,10 +73,11 @@ def test_load_processed_data_and_preprocessor_file_not_found(mock_processed_arti
     with pytest.raises(MyException, match="Failed to load processed data or preprocessor"):
         load_processed_data_and_preprocessor("non_existent_processed.parquet", "non_existent_preprocessor.joblib")
 
+
 def test_split_data(mock_processed_artifacts):
     """Test data splitting proportions and types."""
-    X_mock = mock_processed_artifacts['X']
-    y_mock = mock_processed_artifacts['y']
+    X_mock = mock_processed_artifacts["X"]
+    y_mock = mock_processed_artifacts["y"]
 
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(X_mock, y_mock, test_size=0.2, val_size=0.1)
 
@@ -94,38 +94,40 @@ def test_split_data(mock_processed_artifacts):
     assert isinstance(X_train, np.ndarray)
     assert isinstance(y_train, np.ndarray)
 
+
 def test_train_model(mock_processed_artifacts):
     """Test model training and return type."""
-    X_mock = mock_processed_artifacts['X']
-    y_mock = mock_processed_artifacts['y']
+    X_mock = mock_processed_artifacts["X"]
+    y_mock = mock_processed_artifacts["y"]
 
     # Use a small subset for quick testing
     X_train_small = X_mock[:10]
     y_train_small = y_mock[:10]
 
-    model = train_model(X_train_small, y_train_small, n_estimators=5, max_features=2) # Use small params for speed
+    model = train_model(X_train_small, y_train_small, n_estimators=5, max_features=2)  # Use small params for speed
     assert isinstance(model, RandomForestRegressor)
-    assert hasattr(model, 'predict')
+    assert hasattr(model, "predict")
     assert model.n_estimators == 5
+
 
 def test_evaluate_model(mock_processed_artifacts):
     """Test model evaluation and metrics returned."""
-    X_mock = mock_processed_artifacts['X']
-    y_mock = mock_processed_artifacts['y']
+    X_mock = mock_processed_artifacts["X"]
+    y_mock = mock_processed_artifacts["y"]
 
     # Create a dummy model for evaluation
     class MockModel:
         def predict(self, X):
-            return np.full(X.shape[0], y_mock.mean()) # Predict mean for simplicity
+            return np.full(X.shape[0], y_mock.mean())  # Predict mean for simplicity
 
     model = MockModel()
     metrics = evaluate_model(model, X_mock, y_mock, dataset_name="test_dataset")
 
     assert isinstance(metrics, dict)
-    assert 'test_dataset_mae' in metrics
-    assert 'test_dataset_rmse' in metrics
-    assert 'test_dataset_r2' in metrics
-    assert metrics['test_dataset_mae'] >= 0
-    assert metrics['test_dataset_rmse'] >= 0
+    assert "test_dataset_mae" in metrics
+    assert "test_dataset_rmse" in metrics
+    assert "test_dataset_r2" in metrics
+    assert metrics["test_dataset_mae"] >= 0
+    assert metrics["test_dataset_rmse"] >= 0
     # R2 can be negative for poor models, but for a constant prediction like mean, it's 0
-    assert abs(metrics['test_dataset_r2']) < 0.001 # Should be close to 0 for mean prediction
+    assert abs(metrics["test_dataset_r2"]) < 0.001  # Should be close to 0 for mean prediction

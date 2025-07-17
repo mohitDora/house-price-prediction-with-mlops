@@ -1,7 +1,7 @@
-from loguru import logger
 import sys
-import os
 from pathlib import Path
+
+from loguru import logger
 
 # Get the root directory of the project
 ROOT_DIR = Path(__file__).resolve().parent.parent  # Adjust as needed
@@ -18,8 +18,8 @@ logger.add(
     sys.stderr,
     level="INFO",
     format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-           "<level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
-           "<level>{message}</level>"
+    "<level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+    "<level>{message}</level>",
 )
 
 # Add a file handler for logging to a file at root/logs/
@@ -29,5 +29,5 @@ logger.add(
     rotation="1 day",
     compression="zip",
     enqueue=True,
-    retention="7 days"
+    retention="7 days",
 )

@@ -8,3 +8,5 @@ mlruns/
 /models/preprocessor.joblib
 /data/raw_data.csv
 /data/processed_data.parquet
+.ruff_cache
+.pytest_cache

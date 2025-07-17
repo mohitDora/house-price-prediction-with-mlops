@@ -1,9 +1,11 @@
+import sys
+
 import pandas as pd
 from pymongo import MongoClient
+
 from src.config import config
-from src.logger import logger
 from src.exception import MyException
-import sys
+from src.logger import logger
 
 
 class DataIngestion:
@@ -24,9 +26,7 @@ class DataIngestion:
             self.collection = self.db[self.collection_name]
             logger.info("Successfully connected to MongoDB.")
         except Exception as e:
-            logger.error(
-                f"Failed to connect to MongoDB at {self.mongo_uri}: {e}", exc_info=True
-            )
+            logger.error(f"Failed to connect to MongoDB at {self.mongo_uri}: {e}", exc_info=True)
             raise MyException("Failed to connect to MongoDB.", sys)
 
     def _close_mongodb_connection(self):
@@ -37,9 +37,7 @@ class DataIngestion:
 
     def ingest_data(self):
         """Ingests data from MongoDB and saves it to a raw CSV file."""
-        logger.info(
-            f"Attempting to ingest data from MongoDB collection: {self.collection_name}"
-        )
+        logger.info(f"Attempting to ingest data from MongoDB collection: {self.collection_name}")
         try:
             self._connect_to_mongodb()
 
@@ -60,9 +58,7 @@ class DataIngestion:
 
             # Save the raw data to CSV
             df.to_csv(self.raw_data_path, index=False)
-            logger.info(
-                f"Successfully ingested {df.shape[0]} records and saved to {self.raw_data_path}"
-            )
+            logger.info(f"Successfully ingested {df.shape[0]} records and saved to {self.raw_data_path}")
 
             return df
 
@@ -79,6 +75,4 @@ if __name__ == "__main__":
         raw_df = data_ingestor.ingest_data()
         logger.info(f"Raw data loaded from MongoDB, shape: {raw_df.shape}")
     except Exception as e:
-        logger.error(
-            f"An unexpected error occurred during data ingestion: {e}", exc_info=True
-        )
+        logger.error(f"An unexpected error occurred during data ingestion: {e}", exc_info=True)
