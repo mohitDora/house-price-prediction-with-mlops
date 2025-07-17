@@ -17,16 +17,16 @@ RUN apt-get update && apt-get install -y git && \
 # Copy pyproject.toml and uv.lock first to leverage Docker cache
 # This ensures that if only your application code changes, but dependencies don't,
 # Docker can use a cached layer for dependency installation.
-COPY pyproject.toml /app/
+COPY requirements.txt /app/
 # IMPORTANT: If you are generating and committing a uv.lock file locally (highly recommended for reproducibility),
 # you must uncomment and include the next line:
-COPY uv.lock /app/
+# COPY uv.lock /app/
 
 # Install uv (uv itself is needed to run uv sync)
-RUN pip install uv
+RUN pip install -r requirements.txt
 
 # Install project dependencies using uv sync from pyproject.toml (and uv.lock if copied)
-RUN uv sync
+# RUN uv sync
 
 # Copy the rest of your application code, including .dvc/config and .dvc pointer files
 COPY . /app/
