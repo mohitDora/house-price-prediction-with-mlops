@@ -33,14 +33,11 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install uv
-        run: pip install uv
-
       - name: Install project dependencies (including dvc[s3])
         # Ensure dvc[s3] is listed in your pyproject.toml as a dependency or dev-dependency
         # uv sync will install it if it's there.
         # If not, you might need: pip install "dvc[s3]"
-        run: uv sync --system
+        run: pip install dvc[s3] ruff pytest
 
       - name: Install Git (DVC dependency)
         run: sudo apt-get update && sudo apt-get install -y git
