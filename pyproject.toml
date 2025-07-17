@@ -4,7 +4,23 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+"pandas",
+"numpy",
+"scikit-learn",
+"dvc[gdrive]",
+"mlflow",
+"pytest",
+"pandera",
+"fastapi",
+"uvicorn",
+"python-multipart",
+"joblib",
+"pymongo",
+"python-dotenv",
+"loguru",
+"ipykernel",
+"ruff"]
 
 # pyproject.toml (at the root of your project)
 [tool.ruff]

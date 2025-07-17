@@ -10,3 +10,4 @@ mlruns/
 /data/processed_data.parquet
 .ruff_cache
 .pytest_cache
+/models/final_model.joblib

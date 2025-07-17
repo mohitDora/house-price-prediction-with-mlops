@@ -20,6 +20,7 @@ class Config:
     RAW_DATA_PATH = "data/raw_data.csv"
     PROCESSED_DATA_PATH = "data/processed_data.parquet"
     PREPROCESSOR_PATH = "models/preprocessor.joblib"
+    FINAL_MODEL_PATH = "models/final_model.joblib"
 
     # Model Configuration
     MODEL_NAME = "HousePricePredictor"

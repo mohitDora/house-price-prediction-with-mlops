@@ -191,6 +191,11 @@ if __name__ == "__main__":
             mlflow.log_artifact(schema_file_name)
             os.remove(schema_file_name)  # Clean up local file after logging
 
+            joblib.dump(model, config.FINAL_MODEL_PATH)
+            logger.info(f"Final trained model saved to {config.FINAL_MODEL_PATH}")
+            # Log the local model artifact path to MLflow as well
+            mlflow.log_artifact(config.FINAL_MODEL_PATH)
+
             logger.info(f"MLflow Run ID: {mlflow.active_run().info.run_id}")
             logger.info("Model training and experiment logging complete.")
 
