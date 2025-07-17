@@ -18,6 +18,8 @@ RUN apt-get update && apt-get install -y git && \
 # This ensures that if only your application code changes, but dependencies don't,
 # Docker can use a cached layer for dependency installation.
 COPY requirements.txt /app/
+COPY setup.py /app/
+COPY pyproject.toml /app/
 # IMPORTANT: If you are generating and committing a uv.lock file locally (highly recommended for reproducibility),
 # you must uncomment and include the next line:
 # COPY uv.lock /app/
