@@ -2,7 +2,6 @@
 
 .git
 .gitignore
-.dvc/
 .venv/
 env/
 logs/
@@ -18,8 +17,3 @@ data/raw_data.csv
 data/processed_data.parquet
 models/preprocessor.joblib
 models/final_model.joblib
-
-# DVC specific files (ignore, as they are not needed in the final image)
-# except for the .dvc files themselves which Git tracks and are needed for dvc pull
-*.dvc
-.dvcignore

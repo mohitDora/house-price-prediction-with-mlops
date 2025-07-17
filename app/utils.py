@@ -1,7 +1,3 @@
-# app/utils.py
-
-# app/utils.py
-
 import joblib
 import os, sys
 import subprocess # <--- NEW IMPORT
@@ -21,12 +17,19 @@ def load_model_artifacts():
         model_path = os.path.join("models", "final_model.joblib")
 
         # --- DVC PULL STEP ---
+        app_root_dir = os.getcwd()
         logger.info(f"Checking for and attempting DVC pull for '{preprocessor_path}' and '{model_path}'...")
         try:
             # Use subprocess to run the dvc pull command
             # The 'check=True' will raise a CalledProcessError if the command fails
             # We explicitly pull each artifact to ensure they are present.
-            subprocess.run(["dvc", "pull", preprocessor_path, model_path], check=True, capture_output=True, text=True)
+            subprocess.run(
+                ["dvc", "pull", preprocessor_path, model_path],
+                check=True,
+                cwd=app_root_dir, # <--- THIS IS THE KEY ADDITION
+                capture_output=True,
+                text=True
+            )
             logger.info("DVC pull successful. Artifacts materialized.")
         except subprocess.CalledProcessError as e:
             logger.error(f"DVC pull failed with exit code {e.returncode}. STDOUT: {e.stdout}. STDERR: {e.stderr}", exc_info=True)
