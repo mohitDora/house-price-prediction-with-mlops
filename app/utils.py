@@ -1,9 +1,10 @@
 # app/utils.py
 
+# app/utils.py
+
 import joblib
-import pandas as pd
-import numpy as np
 import os, sys
+import subprocess # <--- NEW IMPORT
 from src.config import config
 from src.logger import logger
 from src.exception import MyException
@@ -11,23 +12,47 @@ from src.exception import MyException
 def load_model_artifacts():
     """
     Loads the preprocessor and the trained model from joblib files.
+    Ensures DVC-tracked artifacts are pulled if not present.
     """
     logger.info("Attempting to load preprocessor and model artifacts...")
     try:
-        preprocessor = joblib.load(config.PREPROCESSOR_PATH)
-        logger.info(f"Preprocessor loaded from {config.PREPROCESSOR_PATH}")
+        preprocessor_path = config.PREPROCESSOR_PATH
+        model_path = os.path.join("models", "final_model.joblib")
 
-        model = joblib.load(os.path.join("models", "final_model.joblib"))
-        logger.info(f"Model loaded from models/final_model.joblib")
+        # --- DVC PULL STEP ---
+        logger.info(f"Checking for and attempting DVC pull for '{preprocessor_path}' and '{model_path}'...")
+        try:
+            # Use subprocess to run the dvc pull command
+            # The 'check=True' will raise a CalledProcessError if the command fails
+            # We explicitly pull each artifact to ensure they are present.
+            subprocess.run(["dvc", "pull", preprocessor_path, model_path], check=True, capture_output=True, text=True)
+            logger.info("DVC pull successful. Artifacts materialized.")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"DVC pull failed with exit code {e.returncode}. STDOUT: {e.stdout}. STDERR: {e.stderr}", exc_info=True)
+            raise MyException(f"DVC pull failed with exit code {e.returncode}")
+        except FileNotFoundError:
+            # This handles the case where the 'dvc' command itself is not found
+            logger.error("DVC command not found. Is DVC installed and in PATH inside the container?", exc_info=True)
+            raise MyException("DVC command not found. Is DVC installed and in PATH inside the container?")
+        # --- END DVC PULL STEP ---
+
+        # Now that DVC has pulled the files, they should exist locally in the container
+        preprocessor = joblib.load(preprocessor_path)
+        logger.info(f"Preprocessor loaded from {preprocessor_path}")
+
+        model = joblib.load(model_path)
+        logger.info(f"Model loaded from {model_path}")
 
         logger.info("Model artifacts loaded successfully.")
         return preprocessor, model
+
     except FileNotFoundError as e:
-        logger.error(f"Required model artifact not found: {e}", exc_info=True)
-        raise MyException(f"Required model artifact not found: {e}", sys)
+        # This catch should ideally not be hit if DVC pull was successful
+        logger.error(f"Required model artifact not found even after DVC pull attempt: {e}", exc_info=True)
+        raise MyException(f"Required model artifact not found even after DVC pull attempt: {e}")
     except Exception as e:
-        logger.error(f"Error loading model artifacts: {e}", exc_info=True)
-        raise MyException(f"Error loading model artifacts: {e}", sys)
+        logger.error(f"An unexpected error occurred during model loading: {e}", exc_info=True)
+        raise MyException(f"An unexpected error occurred during model loading: {e}")
 
 def convert_yes_no_to_binary(df: pd.DataFrame) -> pd.DataFrame:
     """Converts 'yes'/'no' string columns to 1/0 integers in a DataFrame."""
