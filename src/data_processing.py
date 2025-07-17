@@ -5,7 +5,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 import joblib  # For saving preprocessor
-import pandera as pa
+import pandera.pandas as pa
 from sklearn.pipeline import Pipeline
 from pandera.errors import SchemaErrors
 import sys

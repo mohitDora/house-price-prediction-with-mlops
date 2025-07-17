@@ -30,7 +30,7 @@ class Config:
 
     # RandomForestRegressor specific parameters
     RF_N_ESTIMATORS = int(os.getenv("RF_N_ESTIMATORS", 100))
-    RF_MAX_FEATURES = float(os.getenv("RF_MAX_FEATURES", 5))
+    RF_MAX_FEATURES = int(os.getenv("RF_MAX_FEATURES", 5))
 
     # FastAPI Server Configuration
     API_HOST = os.getenv("API_HOST", "0.0.0.0")
