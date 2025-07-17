@@ -8,6 +8,7 @@ import subprocess # <--- NEW IMPORT
 from src.config import config
 from src.logger import logger
 from src.exception import MyException
+import pandas as pd
 
 def load_model_artifacts():
     """
