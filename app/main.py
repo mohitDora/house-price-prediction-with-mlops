@@ -5,8 +5,6 @@ from pydantic import ValidationError
 from typing import List
 import pandas as pd
 import numpy as np
-import os
-import joblib
 
 from app.schema import HouseFeatures, PredictionResponse
 from app.utils import load_model_artifacts, convert_yes_no_to_binary
