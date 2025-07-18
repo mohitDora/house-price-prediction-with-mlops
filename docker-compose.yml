@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  house-price-api:
+    image: house-price-predictor-api:latest
+    container_name: house-price-api
+    ports:
+      - "8000:8000"
+      - "5000:5000"
+    env_file:
+      - .env
+    restart: unless-stopped

@@ -34,7 +34,7 @@ RUN pip install -r requirements.txt
 COPY . /app/
 
 # Expose the port that FastAPI will run on
-EXPOSE 8000
+EXPOSE 8000 5000
 
 # Set the command to run your FastAPI application using Uvicorn
 # Fix: Run uvicorn as a Python module
